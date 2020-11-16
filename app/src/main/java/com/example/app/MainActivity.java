@@ -1,10 +1,11 @@
 package com.example.app;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 
 public class MainActivity extends AppCompatActivity {
+
+    private String pictureName = "New Drawing";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
