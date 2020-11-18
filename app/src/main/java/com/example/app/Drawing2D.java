@@ -15,8 +15,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 
-import androidx.annotation.Nullable;
-
 public class Drawing2D extends View {
 
     private Path dPath = new Path(); // позволяет рисовать и запоминать весь путь фигуры
@@ -84,4 +82,6 @@ public class Drawing2D extends View {
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(dPath, dPaint);
     }
+
+
 }

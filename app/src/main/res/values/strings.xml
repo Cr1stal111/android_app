@@ -2,4 +2,8 @@
     <string name="app_name">app</string>
     <string name="picture_name">Drawing App</string>
     <string name="button_set_text">Erase everything</string>
+    <string name="exit_dialog">Are you seriously want to exit?</string>
+    <string name="go_out">Exit</string>
+    <string name="stay">Stay</string>
+    <string name="Exit_toast">Click again to Exit</string>
 </resources>
