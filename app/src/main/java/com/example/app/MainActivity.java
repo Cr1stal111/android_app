@@ -4,15 +4,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 public class MainActivity extends AppCompatActivity {
-
-    private String pictureName = "New Drawing";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        Drawing2D drawing = new Drawing2D(this);
+        setContentView(drawing);
+        addContentView(drawing.button, drawing.layoutParams);
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+    }
 }
 

@@ -10,58 +10,53 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
 public class Drawing2D extends View {
 
-    private Path dPath; // позволяет рисовать и запоминать весь путь фигуры
+    private Path dPath = new Path(); // позволяет рисовать и запоминать весь путь фигуры
 
-    private Paint cPaint; // что рисуем
+    private Paint dPaint = new Paint(); // как рисуем
 
-    private Paint dPaint; // как рисуем
+    public Button button;
 
-    private int pColor = 0x1400ed00; // первоначальный цвет
+    public LayoutParams layoutParams;
 
-    private Canvas dCanvas; // сам холст
+    private int dColor;
 
-    private Bitmap cBitmap; // растровое изображение холста
+    private final int default_brush_width;
 
-    private float current_brush_size;  // текущий размер кисточки
+    public Drawing2D(Context context) {
+        super(context);
 
-    private float last_brush_size; // последний использованный размер кисти
-
-    public Drawing2D(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-//      setValues();
-        current_brush_size = getResources().getInteger(R.integer.medium_size);
-
-        last_brush_size = current_brush_size;
-
-        dPath = new Path();
-
-        dPaint = new Paint();
-        dPaint.setStyle(Paint.Style.STROKE); // стиль для объекта Paint
-        dPaint.setColor(pColor); // задаём цвет
-        dPaint.setAntiAlias(true); // сглаживаем линии, рисуемые на холсте
-        dPaint.setStrokeWidth(current_brush_size); // задаём ширину кисточки
-        dPaint.setStrokeJoin(Paint.Join.ROUND); // округляет линии
+//        dColor = 0x1400f000;
+        dColor = getResources().getColor(R.color.blue_500);
+        default_brush_width = getResources().getInteger(R.integer.default_size);
+        dPaint.setAntiAlias(true); // сглаживает края
+        dPaint.setColor(this.dColor);
+        dPaint.setStyle(Paint.Style.STROKE);
+        dPaint.setStrokeJoin(Paint.Join.ROUND);
         dPaint.setStrokeCap(Paint.Cap.ROUND);
+        dPaint.setStrokeWidth(default_brush_width);
+        button = new Button(context);
+        button.setText(getResources().getString(R.string.button_set_text));
+        layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        button.setLayoutParams(layoutParams);
 
-        cPaint = new Paint(Paint.DITHER_FLAG);
-    }
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dPath.reset(); // очищает объект dPath
+                postInvalidate(); // уведомляем android об обновлении пользовательского
+                                  // представления
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        canvas.drawBitmap(cBitmap, 0, 0, cPaint);
-        canvas.drawPath(dPath, dPaint);
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        cBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        dCanvas = new Canvas(cBitmap);
+            }
+        });
     }
 
     @Override
@@ -72,23 +67,21 @@ public class Drawing2D extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 dPath.moveTo(positionX, positionY);
-                break;
+                return true;
             case MotionEvent.ACTION_MOVE:
                 dPath.lineTo(positionX, positionY);
                 break;
             case MotionEvent.ACTION_UP:
-                dPath.lineTo(positionX, positionY);
-                dCanvas.drawPath(dPath, dPaint);
-                dPath.reset();
-                break;
+                return true;
             default:
                 return false;
         }
-        invalidate();
-        return true;
+        postInvalidate();
+        return false;
     }
 
-//    private void setValues() {
-//
-//    }
+    @Override
+    protected void onDraw(Canvas canvas) {
+        canvas.drawPath(dPath, dPaint);
+    }
 }

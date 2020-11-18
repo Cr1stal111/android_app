@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">app</string>
-    <string name="picture_name">New Drawing</string>
+    <string name="picture_name">Drawing App</string>
+    <string name="button_set_text">Erase everything</string>
 </resources>
