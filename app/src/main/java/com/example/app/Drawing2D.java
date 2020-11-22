@@ -1,29 +1,46 @@
 package com.example.app;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.os.Build;
-import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.logging.Level;
 
 public class Drawing2D extends View {
 
-    private Path dPath = new Path(); // позволяет рисовать и запоминать весь путь фигуры
+    public Path dPath = new Path(); // позволяет рисовать и запоминать весь путь фигуры
 
-    private Paint dPaint = new Paint(); // как рисуем
+    public Paint dPaint = new Paint(); // как рисуем
 
     public Button button;
 
-    public LayoutParams layoutParams;
+    public BottomNavigationView bottomNavigationView;
+
+    public ImageView imageViewBrush;
+
+    public ImageView imageViewScissors;
+
+    public ImageView imageViewTools;
+
 
     private int dColor;
 
@@ -33,7 +50,7 @@ public class Drawing2D extends View {
         super(context);
 
 //        dColor = 0x1400f000;
-        dColor = getResources().getColor(R.color.blue_500);
+        dColor = getResources().getColor(R.color.purple_500);
         default_brush_width = getResources().getInteger(R.integer.default_size);
         dPaint.setAntiAlias(true); // сглаживает края
         dPaint.setColor(this.dColor);
@@ -41,20 +58,60 @@ public class Drawing2D extends View {
         dPaint.setStrokeJoin(Paint.Join.ROUND);
         dPaint.setStrokeCap(Paint.Cap.ROUND);
         dPaint.setStrokeWidth(default_brush_width);
+
+
         button = new Button(context);
         button.setText(getResources().getString(R.string.button_set_text));
-        layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        button.setLayoutParams(layoutParams);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dPath.reset(); // очищает объект dPath
-                postInvalidate(); // уведомляем android об обновлении пользовательского
-                                  // представления
-
-            }
+        button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT));
+        button.setOnClickListener(view -> {
+            dPath.reset(); // очищает объект dPath
+            postInvalidate(); // уведомляем android об обновлении пользовательского
+                              // представления
         });
+
+        bottomNavigation(context);
+    }
+
+    public void bottomNavigation(Context context) {
+        imageViewBrush = new ImageView(context);
+        imageViewScissors = new ImageView(context);
+        imageViewTools = new ImageView(context);
+
+        bottomNavigationView = new BottomNavigationView(context);
+        bottomNavigationView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT));
+        bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.cool_blue));
+        // бэкграунд панели
+        bottomNavigationView.setItemIconTintList(getResources().getColorStateList(R.color.white));
+        // цвет иконок
+        bottomNavigationView.setItemTextColor(getResources().getColorStateList(R.color.white));
+        // цвет текста под иконками
+        bottomNavigationView.inflateMenu(R.menu.icons_bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.ic_brush:
+                                imageViewBrush.setVisibility(View.VISIBLE);
+                                imageViewScissors.setVisibility(View.GONE);
+                                imageViewTools.setVisibility(View.GONE);
+                                break;
+                            case R.id.ic_scissors:
+                                imageViewBrush.setVisibility(View.GONE);
+                                imageViewScissors.setVisibility(View.VISIBLE);
+                                imageViewTools.setVisibility(View.GONE);
+                                break;
+                            case R.id.ic_tools:
+                                imageViewBrush.setVisibility(View.GONE);
+                                imageViewScissors.setVisibility(View.GONE);
+                                imageViewTools.setVisibility(View.VISIBLE);
+                                break;
+                        }
+                        return false;
+                    }
+                });
     }
 
     @Override
@@ -82,6 +139,5 @@ public class Drawing2D extends View {
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(dPath, dPaint);
     }
-
 
 }
