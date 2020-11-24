@@ -32,7 +32,7 @@ public class Drawing2D extends View {
     public Paint dPaint = new Paint(); // как рисуем
 
     public Button button;
-
+//  ======= BottomNavigationView =======
     public BottomNavigationView bottomNavigationView;
 
     public ImageView imageViewBrush;
@@ -41,7 +41,8 @@ public class Drawing2D extends View {
 
     public ImageView imageViewTools;
 
-
+    public ColorStateList colorStateList;
+    //  ======= /BottomNavigationView =======
     private int dColor;
 
     private final int default_brush_width;
@@ -78,40 +79,59 @@ public class Drawing2D extends View {
         imageViewScissors = new ImageView(context);
         imageViewTools = new ImageView(context);
 
+        colorStateList = new ColorStateList(new int[][]{
+                new int[]{android.R.attr.state_checked},
+                new int[]{android.R.attr.state_enabled}
+        },
+                new int[] {
+                        Color.GREEN,
+                        Color.BLACK
+                });
+
         bottomNavigationView = new BottomNavigationView(context);
         bottomNavigationView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT));
         bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.cool_blue));
         // бэкграунд панели
-        bottomNavigationView.setItemIconTintList(getResources().getColorStateList(R.color.white));
+        bottomNavigationView.setItemIconTintList(colorStateList);
         // цвет иконок
-        bottomNavigationView.setItemTextColor(getResources().getColorStateList(R.color.white));
+        bottomNavigationView.setItemTextColor(colorStateList);
         // цвет текста под иконками
+        bottomNavigationView.getMenu().clear();
         bottomNavigationView.inflateMenu(R.menu.icons_bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.ic_brush:
-                                imageViewBrush.setVisibility(View.VISIBLE);
-                                imageViewScissors.setVisibility(View.GONE);
-                                imageViewTools.setVisibility(View.GONE);
-                                break;
-                            case R.id.ic_scissors:
-                                imageViewBrush.setVisibility(View.GONE);
-                                imageViewScissors.setVisibility(View.VISIBLE);
-                                imageViewTools.setVisibility(View.GONE);
-                                break;
-                            case R.id.ic_tools:
-                                imageViewBrush.setVisibility(View.GONE);
-                                imageViewScissors.setVisibility(View.GONE);
-                                imageViewTools.setVisibility(View.VISIBLE);
-                                break;
-                        }
-                        return false;
-                    }
-                });
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.ic_brush:
+                        imageViewBrush.setVisibility(View.VISIBLE);
+//                            imageViewBrush.setEnabled(true);
+                        imageViewScissors.setVisibility(View.GONE);
+//                            imageViewScissors.setEnabled(false);
+                        imageViewTools.setVisibility(View.GONE);
+//                            imageViewTools.setEnabled(false);
+                        return true;
+                    case R.id.ic_scissors:
+                        imageViewBrush.setVisibility(View.GONE);
+//                            imageViewBrush.setEnabled(false);
+                        imageViewScissors.setVisibility(View.VISIBLE);
+//                            imageViewScissors.setEnabled(true);
+                        imageViewTools.setVisibility(View.GONE);
+//                            imageViewTools.setEnabled(false);
+                        return true;
+                    case R.id.ic_tools:
+                        imageViewBrush.setVisibility(View.GONE);
+//                            imageViewBrush.setEnabled(false);
+                        imageViewScissors.setVisibility(View.GONE);
+//                            imageViewScissors.setEnabled(false);
+                        imageViewTools.setVisibility(View.VISIBLE);
+//                            imageViewTools.setEnabled(true);
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override

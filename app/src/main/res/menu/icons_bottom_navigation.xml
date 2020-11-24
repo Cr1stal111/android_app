@@ -4,22 +4,16 @@
     <item
         android:id="@+id/ic_brush"
         android:title="brush"
-        android:enabled="true"
-        android:visible="true"
         android:icon="@drawable/ic_brush"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/ic_scissors"
         android:title="scissors"
-        android:enabled="true"
-        android:visible="true"
         android:icon="@drawable/ic_scissors"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/ic_tools"
         android:title="tools"
-        android:enabled="true"
-        android:visible="true"
         android:icon="@drawable/ic_tools"
         app:showAsAction="ifRoom"/>
 </menu>
