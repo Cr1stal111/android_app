@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(relativeLayout);
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
