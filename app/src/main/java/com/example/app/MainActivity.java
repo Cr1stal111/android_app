@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.DialogInterface;
+import android.icu.text.RelativeDateTimeFormatter;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
@@ -31,16 +32,39 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Drawing2D drawing = new Drawing2D(this);
-        Button button = drawing.button;
-        BottomNavigationView bottomNavigationView = drawing.bottomNavigationView;
+        RelativeLayout.LayoutParams layoutParamsDrawing = new RelativeLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        layoutParamsDrawing.setMargins(0, 178, 0, 0);
+        Toolbar toolbarView = new Toolbar(this);
+        RelativeLayout.LayoutParams layoutParamsToolbar = new RelativeLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, 178);
+        layoutParamsToolbar.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        toolbarView.setLayoutParams(layoutParamsToolbar);
+        toolbarView.setBackgroundColor(getResources().getColor(R.color.bar_color));
+//        toolbarView.setMinimumHeight(R.attr.actionBarSize);
+//        toolbarView.setPopupTheme(R.style.AppTheme);
+//        toolbarView.inflateMenu(R.menu.icons_bottom_navigation);
+        toolbarView.setTitle(R.string.toolbar_title);
+        toolbarView.setTitleTextColor(getResources().getColor(R.color.white));
+        toolbarView.setVisibility(View.VISIBLE);
+        setSupportActionBar(toolbarView);
 
+        Button button = drawing.button;
+        RelativeLayout.LayoutParams layoutParamsButton = new RelativeLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        layoutParamsButton.setMargins(0, 188, 0, 0);
+
+        BottomNavigationView bottomNavigationView = drawing.bottomNavigationView;
+        
         RelativeLayout relativeLayout = new RelativeLayout(this);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        relativeLayout.addView(drawing);
-        relativeLayout.addView(button);
+        relativeLayout.addView(drawing, layoutParamsDrawing);
+        relativeLayout.addView(toolbarView, 0);
+        relativeLayout.addView(button, layoutParamsButton);
         relativeLayout.addView(bottomNavigationView, layoutParams);
+
         setContentView(relativeLayout);
     }
 

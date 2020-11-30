@@ -12,8 +12,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -23,6 +28,7 @@ import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.internal.ViewUtils;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -51,7 +57,7 @@ public class Drawing2D extends View {
 
     private int dColor = Color.BLACK;
 
-    private int default_brush_width = getResources().getInteger(R.integer.default_size);
+    public int default_brush_width = getResources().getInteger(R.integer.default_size);
 
     public Drawing2D(Context context) {
         super(context);
@@ -60,11 +66,11 @@ public class Drawing2D extends View {
 
         button = new Button(context);
         button.setText(getResources().getString(R.string.button_set_text));
-        button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT));
+//        button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+//                LayoutParams.WRAP_CONTENT));
         button.setOnClickListener(view -> {
             if (drawPaths.size() != 1) {
-                drawPaths.remove(drawPaths.size() - 1); // очищает объект dPath
+                drawPaths.remove(drawPaths.size() - 1);
                 drawPaints.remove(drawPaints.size() - 1);
                 postInvalidate(); // уведомляем android об обновлении пользовательского интерфейса
             } else {
@@ -101,11 +107,15 @@ public class Drawing2D extends View {
         dColor = color;
     }
 
+    public void setNewWidth(int width) {
+        default_brush_width = width;
+    }
+
     public void bottomNavigation(Context context) {
+
         imageViewTools = new ImageView(context);
         imageViewPicker = new ImageView(context);
         imageViewFill = new ImageView(context);
-
         colorStateList = new ColorStateList(new int[][]{
                 {android.R.attr.state_checked},
                 {android.R.attr.state_enabled}
@@ -122,7 +132,6 @@ public class Drawing2D extends View {
                                                                                 // бэкграунд панели
         bottomNavigationView.setItemIconTintList(colorStateList); // цвет иконок
         bottomNavigationView.setItemTextColor(colorStateList); // цвет текста под иконками
-        bottomNavigationView.getMenu().clear();
         bottomNavigationView.inflateMenu(R.menu.icons_bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -190,43 +199,47 @@ public class Drawing2D extends View {
 
     public static void showAlertDialog(Context context)  {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        // Set Title and Message:
         builder.setTitle(context.getResources().getString(R.string.title_tools));
-
         builder.setCancelable(true);
 
-        // Create "Positive" button with OnClickListener.
-//        builder.setPositiveButton("Positive", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                Toast.makeText(context,"You choose positive button",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//        builder.setPositiveButtonIcon(positiveIcon);
+        ImageButton imageView1 = new ImageButton(context);
+//        imageView1.setBackground(context.getResources().getDrawable(R.drawable.ic_clear));
+        imageView1.setBackground(context.getResources().
+                getDrawable(R.drawable.background_color_icons_bottom_navigation));
+//        imageView1.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_clear));
+        imageView1.setScaleType(ImageView.ScaleType.FIT_XY);
 
-        // Create "Negative" button with OnClickListener.
-//        builder.setNegativeButton("Negative", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                Toast.makeText(context,"You choose positive button",
-//                        Toast.LENGTH_SHORT).show();
-//                //  Cancel
-//                dialog.cancel();
-//            }
-//        });
-//        builder.setNegativeButtonIcon(negativeIcon);
+        RelativeLayout.LayoutParams layoutParamsImage1 = new RelativeLayout.LayoutParams(
+                180, 180);
+        layoutParamsImage1.setMargins(50, 50, 0, 0);
 
-        // Create "Neutral" button with OnClickListener.
-//        builder.setNeutralButton("Neutral", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                //  Action for 'NO' Button
-//                Toast.makeText(context,"You choose neutral button",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//        builder.setNeutralButtonIcon(neutralIcon); // Not working!!!
+                                imageView1.setOnClickListener(new OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
 
-        // Create AlertDialog:
+                                    }
+                                });
+        RelativeLayout linearLayout = new RelativeLayout(context);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        linearLayout.setPadding(50, 50, 0, 0);
+        linearLayout.addView(imageView1, layoutParamsImage1);
+        builder.setView(linearLayout);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(context,"You choose positive button",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(context,"You choose negative button",
+                        Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+            }
+        });
         AlertDialog alert = builder.create();
         alert.show();
     }
