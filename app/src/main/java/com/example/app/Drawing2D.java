@@ -3,36 +3,46 @@ package com.example.app;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Environment;
+import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.internal.ViewUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
-
 
 public class Drawing2D extends View {
 
@@ -40,7 +50,7 @@ public class Drawing2D extends View {
 
     private LinkedList<Paint> drawPaints = new LinkedList<>();
 
-    public Button button;
+    public Toolbar toolbarView;
 
     //  ======= BottomNavigationView =======
     public BottomNavigationView bottomNavigationView;
@@ -52,40 +62,44 @@ public class Drawing2D extends View {
     public ImageView imageViewFill;
 
     public ColorStateList colorStateList;
-
     //  ======= /BottomNavigationView =======
+
+    private Canvas newCanvas;
+
+    private String someText = "";
 
     private int dColor = Color.BLACK;
 
     public int default_brush_width = getResources().getInteger(R.integer.default_size);
 
+    private DateFormat dateFormat;
+
+    private Bitmap mBitmap;
+
     public Drawing2D(Context context) {
         super(context);
+        setFocusableInTouchMode(true);
+        setDrawingCacheEnabled(true);
+
+
+
         addNewPath();
 
-
-        button = new Button(context);
-        button.setText(getResources().getString(R.string.button_set_text));
-//        button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-//                LayoutParams.WRAP_CONTENT));
-        button.setOnClickListener(view -> {
-            if (drawPaths.size() != 1) {
-                drawPaths.remove(drawPaths.size() - 1);
-                drawPaints.remove(drawPaints.size() - 1);
-                postInvalidate(); // уведомляем android об обновлении пользовательского интерфейса
-            } else {
-                Toast.makeText(context, "There is nothing to remove!", Toast.LENGTH_SHORT)
-                        .show();
-            }
-        });
-
+        toolbarView(context);
         bottomNavigation(context);
 
     }
 
+    public void createBitmap() {
+//        int height = displayMetrics.heightPixels;
+//        int width = displayMetrics.widthPixels;
+        mBitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+//        newCanvas = new Canvas(mBitmap);
+    }
+
     private Paint addNewPaint() {
         Paint dPaint = new Paint();
-        dPaint.setSubpixelText(true); // сглаживает
+                                        // сглаживает
         dPaint.setAntiAlias(true); // края
         dPaint.setColor(this.dColor);
         dPaint.setStyle(Paint.Style.STROKE);
@@ -110,6 +124,115 @@ public class Drawing2D extends View {
     public void setNewWidth(int width) {
         default_brush_width = width;
     }
+
+    public void toolbarView(Context context) {
+        toolbarView = new Toolbar(context);
+        toolbarView.setBackgroundColor(getResources().getColor(R.color.bar_color));
+//        toolbarView.setMinimumHeight(R.attr.actionBarSize);
+//        toolbarView.setPopupTheme(R.style.AppTheme);
+        toolbarView.setTitle(R.string.toolbar_title);
+        toolbarView.setTitleTextColor(getResources().getColor(R.color.white));
+        toolbarView.setVisibility(View.VISIBLE);
+        toolbarView.inflateMenu(R.menu.icons_toolbar);
+
+    }
+
+    public void cancelAction() {
+        if (drawPaths.size() != 1) {
+            drawPaths.remove(drawPaths.size() - 1);
+            drawPaints.remove(drawPaints.size() - 1);
+            postInvalidate();
+        } else {
+            Toast.makeText(getContext(), "There is nothing to remove!",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void saveImage(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(getContext().getResources().getString(R.string.save_title));
+        builder.setCancelable(true);
+
+        EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+
+
+                someText = input.getText().toString();
+                if (someText.equals("") || someText.contains(" ")) {
+                    Toast.makeText(getContext(), "Empty name picture!", Toast.LENGTH_SHORT)
+                            .show();
+                } else {
+                    toolbarView.setTitle(someText);
+                    Toast.makeText(getContext(),"Saved successfully",
+                            Toast.LENGTH_SHORT).show();
+
+                    File sdDirectory = context.getExternalFilesDir("/");
+//                    File subDirectory = new File(sdDirectory.toString() + "DCIM/Camera");
+
+                    //Если выбранная директория существует, то генерируется имя файла
+                    if (sdDirectory.exists()) {
+                        File image = new File(sdDirectory, "/" + someText + ".png");
+                        FileOutputStream fileOutputStream;
+
+                        //Попытка сохранения
+                        try {
+
+                            fileOutputStream = new FileOutputStream(image);
+                            mBitmap = Bitmap.createBitmap(getDrawingCache());
+                            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+
+
+                        } catch (FileNotFoundException e) {
+
+                        } catch (IOException e) {
+
+                        }
+                    }
+
+
+
+
+
+
+
+//                    Bitmap bmp1 = Bitmap.createBitmap(newCanvas.getWidth(), newCanvas.getHeight(),
+//                            Bitmap.Config.ARGB_8888);
+//
+//                    File file = new File(getContext().getFilesDir(), "imageStitched.png");
+//                    System.out.println("-------======= "+ getContext().getFilesDir() +" =======-------");
+//
+//                    try {
+//                        FileOutputStream fos = null;
+//                        try {
+//                            fos = new FileOutputStream(file);
+//                            bmp1.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//                        } finally {
+//                            if (fos != null) fos.close();
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
 
     public void bottomNavigation(Context context) {
 
@@ -154,6 +277,7 @@ public class Drawing2D extends View {
                                 imageViewTools.setVisibility(View.GONE);
                                 imageViewPicker.setVisibility(View.GONE);
                                 imageViewFill.setVisibility(View.VISIBLE);
+                                toolbarView.setTitle(R.string.toolbar_title);
                                 for (int i = 0; i < drawPaths.size(); i++) {
                                     drawPaths.clear();
                                     drawPaints.clear();
@@ -271,14 +395,17 @@ public class Drawing2D extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        newCanvas = canvas;
+        newCanvas.drawColor(getResources().getColor(R.color.white));
         Iterator<Path> paths = drawPaths.iterator();
         Iterator<Paint> paints = drawPaints.iterator();
         while (paths.hasNext() && paints.hasNext()) {
             Path path = paths.next();
             Paint drawPaint = paints.next();
 
-            canvas.drawPath(path, drawPaint);
+            newCanvas.drawPath(path, drawPaint);
         }
+        newCanvas = new Canvas(mBitmap);
     }
 
 }

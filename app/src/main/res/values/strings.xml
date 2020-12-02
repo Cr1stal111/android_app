@@ -8,4 +8,5 @@
     <string name="Exit_toast">Click again to Exit</string>
     <string name="title_tools">Tools</string>
     <string name="toolbar_title">New picture</string>
+    <string name="save_title">Save image</string>
 </resources>
