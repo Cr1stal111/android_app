@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         RelativeLayout.LayoutParams layoutParamsDrawing = new RelativeLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        layoutParamsDrawing.setMargins(0, 178, 0, 0);
+        layoutParamsDrawing.setMargins(0, 178, 0, 168);
         Toolbar toolbarView = drawing.toolbarView;
         RelativeLayout.LayoutParams layoutParamsToolbar = new RelativeLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, 178);

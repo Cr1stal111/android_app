@@ -72,29 +72,19 @@ public class Drawing2D extends View {
 
     public int default_brush_width = getResources().getInteger(R.integer.default_size);
 
-    private DateFormat dateFormat;
-
     private Bitmap mBitmap;
 
     public Drawing2D(Context context) {
         super(context);
         setFocusableInTouchMode(true);
         setDrawingCacheEnabled(true);
-
-
-
         addNewPath();
-
         toolbarView(context);
         bottomNavigation(context);
-
     }
 
     public void createBitmap() {
-//        int height = displayMetrics.heightPixels;
-//        int width = displayMetrics.widthPixels;
         mBitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-//        newCanvas = new Canvas(mBitmap);
     }
 
     private Paint addNewPaint() {
@@ -138,6 +128,7 @@ public class Drawing2D extends View {
     }
 
     public void cancelAction() {
+        setDrawingCacheEnabled(false);
         if (drawPaths.size() != 1) {
             drawPaths.remove(drawPaths.size() - 1);
             drawPaints.remove(drawPaints.size() - 1);
@@ -146,6 +137,7 @@ public class Drawing2D extends View {
             Toast.makeText(getContext(), "There is nothing to remove!",
                     Toast.LENGTH_SHORT).show();
         }
+        setDrawingCacheEnabled(true);
     }
 
     public void saveImage(Context context) {
@@ -159,9 +151,6 @@ public class Drawing2D extends View {
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-
-
-
                 someText = input.getText().toString();
                 if (someText.equals("") || someText.contains(" ")) {
                     Toast.makeText(getContext(), "Empty name picture!", Toast.LENGTH_SHORT)
@@ -172,9 +161,7 @@ public class Drawing2D extends View {
                             Toast.LENGTH_SHORT).show();
 
                     File sdDirectory = context.getExternalFilesDir("/");
-//                    File subDirectory = new File(sdDirectory.toString() + "DCIM/Camera");
 
-                    //Если выбранная директория существует, то генерируется имя файла
                     if (sdDirectory.exists()) {
                         File image = new File(sdDirectory, "/" + someText + ".png");
                         FileOutputStream fileOutputStream;
@@ -185,10 +172,10 @@ public class Drawing2D extends View {
                             fileOutputStream = new FileOutputStream(image);
                             mBitmap = Bitmap.createBitmap(getDrawingCache());
                             mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+                            setDrawingCacheEnabled(false);
 
                             fileOutputStream.flush();
                             fileOutputStream.close();
-
 
                         } catch (FileNotFoundException e) {
 
@@ -196,30 +183,6 @@ public class Drawing2D extends View {
 
                         }
                     }
-
-
-
-
-
-
-
-//                    Bitmap bmp1 = Bitmap.createBitmap(newCanvas.getWidth(), newCanvas.getHeight(),
-//                            Bitmap.Config.ARGB_8888);
-//
-//                    File file = new File(getContext().getFilesDir(), "imageStitched.png");
-//                    System.out.println("-------======= "+ getContext().getFilesDir() +" =======-------");
-//
-//                    try {
-//                        FileOutputStream fos = null;
-//                        try {
-//                            fos = new FileOutputStream(file);
-//                            bmp1.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-//                        } finally {
-//                            if (fos != null) fos.close();
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
                 }
             }
         });
@@ -278,11 +241,10 @@ public class Drawing2D extends View {
                                 imageViewPicker.setVisibility(View.GONE);
                                 imageViewFill.setVisibility(View.VISIBLE);
                                 toolbarView.setTitle(R.string.toolbar_title);
-                                for (int i = 0; i < drawPaths.size(); i++) {
-                                    drawPaths.clear();
-                                    drawPaints.clear();
-                                    addNewPath();
-                                }
+                                drawPaths.clear();
+                                drawPaints.clear();
+                                addNewPath();
+                                setDrawingCacheEnabled(true);
                                 postInvalidate();
                                 return true;
                         }
@@ -405,7 +367,7 @@ public class Drawing2D extends View {
 
             newCanvas.drawPath(path, drawPaint);
         }
-        newCanvas = new Canvas(mBitmap);
+//        newCanvas = new Canvas(mBitmap);
     }
 
 }
