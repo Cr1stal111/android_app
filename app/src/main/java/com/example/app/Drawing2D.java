@@ -8,20 +8,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Environment;
 import android.text.InputType;
-import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
-
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -37,10 +30,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -55,71 +44,69 @@ public class Drawing2D extends View {
     //  ======= BottomNavigationView =======
     public BottomNavigationView bottomNavigationView;
 
-    public ImageView imageViewTools;
-
-    public ImageView imageViewPicker;
-
-    public ImageView imageViewFill;
-
-    public ColorStateList colorStateList;
+    private ColorStateList colorStateList;
     //  ======= /BottomNavigationView =======
 
     private Canvas newCanvas;
 
     private String someText = "";
 
+    private Paint.Style style = Paint.Style.STROKE;
+
     private int dColor = Color.BLACK;
 
-    public int default_brush_width = getResources().getInteger(R.integer.default_size);
+    private int brush_width = getResources().getInteger(R.integer.default_size);
 
     private Bitmap mBitmap;
 
     public Drawing2D(Context context) {
         super(context);
-        setFocusableInTouchMode(true);
         setDrawingCacheEnabled(true);
-        addNewPath();
+        addNewPath(style);
         toolbarView(context);
         bottomNavigation(context);
     }
 
-    public void createBitmap() {
+    protected void createBitmap() {
         mBitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        setDrawingCacheEnabled(true);
     }
 
-    private Paint addNewPaint() {
+    private Paint addNewPaint(Paint.Style style) {
         Paint dPaint = new Paint();
-                                        // сглаживает
-        dPaint.setAntiAlias(true); // края
-        dPaint.setColor(this.dColor);
-        dPaint.setStyle(Paint.Style.STROKE);
+        dPaint.setAntiAlias(true); //сглаживает края
+        dPaint.setColor(dColor);
+        dPaint.setStyle(style);
         dPaint.setStrokeJoin(Paint.Join.ROUND);
         dPaint.setStrokeCap(Paint.Cap.ROUND);
-        dPaint.setStrokeWidth(default_brush_width);
+        dPaint.setStrokeWidth(brush_width);
         drawPaints.add(dPaint);
         return dPaint;
     }
 
-    private Path addNewPath() {
+    private Path addNewPath(Paint.Style style) {
         Path dPath = new Path();
         drawPaths.add(dPath);
-        addNewPaint();
+        addNewPaint(style);
         return dPath;
     }
 
-    public void setNewColor(int color) {
+    private void setNewColor(int color) {
         dColor = color;
     }
 
-    public void setNewWidth(int width) {
-        default_brush_width = width;
+    private void clearCanvas() {
+        toolbarView.setTitle(R.string.toolbar_title);
+        drawPaths.clear();
+        drawPaints.clear();
+        addNewPath(style);
+        setDrawingCacheEnabled(true);
+        postInvalidate();
     }
 
-    public void toolbarView(Context context) {
+    private void toolbarView(Context context) {
         toolbarView = new Toolbar(context);
         toolbarView.setBackgroundColor(getResources().getColor(R.color.bar_color));
-//        toolbarView.setMinimumHeight(R.attr.actionBarSize);
-//        toolbarView.setPopupTheme(R.style.AppTheme);
         toolbarView.setTitle(R.string.toolbar_title);
         toolbarView.setTitleTextColor(getResources().getColor(R.color.white));
         toolbarView.setVisibility(View.VISIBLE);
@@ -127,7 +114,7 @@ public class Drawing2D extends View {
 
     }
 
-    public void cancelAction() {
+    protected void cancelAction() {
         setDrawingCacheEnabled(false);
         if (drawPaths.size() != 1) {
             drawPaths.remove(drawPaths.size() - 1);
@@ -140,7 +127,7 @@ public class Drawing2D extends View {
         setDrawingCacheEnabled(true);
     }
 
-    public void saveImage(Context context) {
+    protected void saveImage(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getContext().getResources().getString(R.string.save_title));
         builder.setCancelable(true);
@@ -153,12 +140,10 @@ public class Drawing2D extends View {
             public void onClick(DialogInterface dialog, int id) {
                 someText = input.getText().toString();
                 if (someText.equals("") || someText.contains(" ")) {
-                    Toast.makeText(getContext(), "Empty name picture!", Toast.LENGTH_SHORT)
-                            .show();
+                    Toast.makeText(getContext(), "Wrong name for the picture!",
+                            Toast.LENGTH_SHORT).show();
                 } else {
                     toolbarView.setTitle(someText);
-                    Toast.makeText(getContext(),"Saved successfully",
-                            Toast.LENGTH_SHORT).show();
 
                     File sdDirectory = context.getExternalFilesDir("/");
 
@@ -166,21 +151,24 @@ public class Drawing2D extends View {
                         File image = new File(sdDirectory, "/" + someText + ".png");
                         FileOutputStream fileOutputStream;
 
-                        //Попытка сохранения
                         try {
-
                             fileOutputStream = new FileOutputStream(image);
                             mBitmap = Bitmap.createBitmap(getDrawingCache());
                             mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
                             setDrawingCacheEnabled(false);
 
-                            fileOutputStream.flush();
-                            fileOutputStream.close();
+                            fileOutputStream.flush(); //очищает любые выходные буферы,
+                                                        // завершая операцию вывода
+                            fileOutputStream.close(); //закрывает выходной поток.
+                            // Последующие попытки записи в этот поток будут возбуждать IOException
 
+                            createBitmap();
+                            Toast.makeText(getContext(),"Saved successfully",
+                                    Toast.LENGTH_SHORT).show();
                         } catch (FileNotFoundException e) {
-
+//                            some code
                         } catch (IOException e) {
-
+//                            some code
                         }
                     }
                 }
@@ -197,11 +185,8 @@ public class Drawing2D extends View {
     }
 
 
-    public void bottomNavigation(Context context) {
+    private void bottomNavigation(Context context) {
 
-        imageViewTools = new ImageView(context);
-        imageViewPicker = new ImageView(context);
-        imageViewFill = new ImageView(context);
         colorStateList = new ColorStateList(new int[][]{
                 {android.R.attr.state_checked},
                 {android.R.attr.state_enabled}
@@ -224,36 +209,36 @@ public class Drawing2D extends View {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
-                            case R.id.ic_tools:
-                                imageViewTools.setVisibility(View.VISIBLE);
-                                showAlertDialog(context);
-                                imageViewPicker.setVisibility(View.GONE);
-                                imageViewFill.setVisibility(View.GONE);
+                            case R.id.ic_pencil:
+                                style = Paint.Style.STROKE;
+//                                addNewPath(style);
+                                brush_width = getResources().getInteger(R.integer.default_size);
+                                dColor = Color.BLACK;
+                                return true;
+                            case R.id.ic_paintbrush:
+                                style = Paint.Style.FILL;
+//                                addNewPath(Paint.Style.FILL);
+                                brush_width = getResources().getInteger(R.integer.default_size);
+                                dColor = Color.BLACK;
+                                return true;
+                            case R.id.ic_eraser:
+                                style = Paint.Style.STROKE;
+                                brush_width = getResources().getInteger(R.integer.eraser_size);
+                                dColor = Color.WHITE;
                                 return true;
                             case R.id.ic_picker:
-                                imageViewTools.setVisibility(View.GONE);
-                                imageViewPicker.setVisibility(View.VISIBLE);
                                 colorPicker(context);
-                                imageViewFill.setVisibility(View.GONE);
-                                return true;
+                                break;
                             case R.id.ic_casting:
-                                imageViewTools.setVisibility(View.GONE);
-                                imageViewPicker.setVisibility(View.GONE);
-                                imageViewFill.setVisibility(View.VISIBLE);
-                                toolbarView.setTitle(R.string.toolbar_title);
-                                drawPaths.clear();
-                                drawPaints.clear();
-                                addNewPath();
-                                setDrawingCacheEnabled(true);
-                                postInvalidate();
-                                return true;
+                                clearCanvas();
+                                break;
                         }
                         return false;
                     }
                 });
     }
 
-    public void colorPicker(Context context) {
+    private void colorPicker(Context context) {
         ColorPickerDialogBuilder
                 .with(context)
                 .setTitle("Choose color")
@@ -283,62 +268,15 @@ public class Drawing2D extends View {
                 .show();
     }
 
-    public static void showAlertDialog(Context context)  {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_tools));
-        builder.setCancelable(true);
-
-        ImageButton imageView1 = new ImageButton(context);
-//        imageView1.setBackground(context.getResources().getDrawable(R.drawable.ic_clear));
-        imageView1.setBackground(context.getResources().
-                getDrawable(R.drawable.background_color_icons_bottom_navigation));
-//        imageView1.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_clear));
-        imageView1.setScaleType(ImageView.ScaleType.FIT_XY);
-
-        RelativeLayout.LayoutParams layoutParamsImage1 = new RelativeLayout.LayoutParams(
-                180, 180);
-        layoutParamsImage1.setMargins(50, 50, 0, 0);
-
-                                imageView1.setOnClickListener(new OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-
-                                    }
-                                });
-        RelativeLayout linearLayout = new RelativeLayout(context);
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        linearLayout.setPadding(50, 50, 0, 0);
-        linearLayout.addView(imageView1, layoutParamsImage1);
-        builder.setView(linearLayout);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Toast.makeText(context,"You choose positive button",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Toast.makeText(context,"You choose negative button",
-                        Toast.LENGTH_SHORT).show();
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Path dPath = drawPaths.get(drawPaths.size() - 1);
+        Path dPath;
         float positionX = event.getX();
         float positionY = event.getY();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Path new_path = addNewPath();
+                Path new_path = addNewPath(style);
                 new_path.moveTo(positionX, positionY);
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -346,7 +284,7 @@ public class Drawing2D extends View {
                 dPath.lineTo(positionX, positionY);
                 break;
             case MotionEvent.ACTION_UP:
-                dPath = drawPaths.get(drawPaths.size() - 1);
+//                some code
                 return true;
             default:
                 return false;
@@ -367,7 +305,6 @@ public class Drawing2D extends View {
 
             newCanvas.drawPath(path, drawPaint);
         }
-//        newCanvas = new Canvas(mBitmap);
     }
 
 }

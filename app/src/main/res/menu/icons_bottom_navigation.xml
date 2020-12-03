@@ -2,13 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/ic_tools"
-        android:title="tools"
-        android:icon="@drawable/ic_tools"
+        android:id="@+id/ic_pencil"
+        android:title="pencil"
+        android:icon="@drawable/ic_pencil"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/ic_paintbrush"
+        android:title="brush"
+        android:icon="@drawable/ic_pencil"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/ic_eraser"
+        android:title="eraser"
+        android:icon="@drawable/ic_eraser"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/ic_picker"
         android:title="picker"
+        android:checked="true"
         android:icon="@drawable/ic_picker"
         app:showAsAction="ifRoom"/>
     <item

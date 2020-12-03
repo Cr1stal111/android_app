@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="medium_size">10</integer>
-    <integer name="default_size">35</integer>
+    <integer name="default_size">25</integer>
+<!--    <integer name="brush_size">30</integer>-->
+    <integer name="eraser_size">20</integer>
 </resources>

@@ -2,7 +2,7 @@
 <resources>
     <string-array name="tools">
         <item>@drawable/ic_picker</item>
-        <item>@drawable/ic_tools</item>
+        <item>@drawable/ic_pencil</item>
         <item>@drawable/ic_casting</item>
     </string-array>
 </resources>
