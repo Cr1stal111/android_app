@@ -211,13 +211,11 @@ public class Drawing2D extends View {
                         switch (item.getItemId()) {
                             case R.id.ic_pencil:
                                 style = Paint.Style.STROKE;
-//                                addNewPath(style);
                                 brush_width = getResources().getInteger(R.integer.default_size);
                                 dColor = Color.BLACK;
                                 return true;
                             case R.id.ic_paintbrush:
                                 style = Paint.Style.FILL;
-//                                addNewPath(Paint.Style.FILL);
                                 brush_width = getResources().getInteger(R.integer.default_size);
                                 dColor = Color.BLACK;
                                 return true;

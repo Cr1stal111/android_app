@@ -9,7 +9,7 @@
     <item
         android:id="@+id/ic_paintbrush"
         android:title="brush"
-        android:icon="@drawable/ic_pencil"
+        android:icon="@drawable/ic_paintbrush"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/ic_eraser"

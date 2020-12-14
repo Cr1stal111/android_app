@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(toolbarView);
         relativeLayout.addView(bottomNavigationView, layoutParams);
         setContentView(relativeLayout);
-        drawing.createBitmap();
     }
 
     public void requestPermission() {
