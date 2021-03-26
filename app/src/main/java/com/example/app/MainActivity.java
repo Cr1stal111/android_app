@@ -21,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
 
     public Drawing2D drawing;
 
+    public LoginActivity loginActivity;
+
+    public RegisterActivity registerActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.ic_upload:
+                        drawing.uploadImage(MainActivity.this);
+                        break;
                     case R.id.ic_undo:
                         drawing.cancelAction();
                         break;

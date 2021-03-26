@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/ic_upload"
+        android:enabled="true"
+        android:title="upload"
+        android:icon="@drawable/ic_upload"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/ic_undo"
         android:enabled="true"
         android:title="undo"

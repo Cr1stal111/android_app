@@ -111,7 +111,6 @@ public class Drawing2D extends View {
         toolbarView.setTitleTextColor(getResources().getColor(R.color.white));
         toolbarView.setVisibility(View.VISIBLE);
         toolbarView.inflateMenu(R.menu.icons_toolbar);
-
     }
 
     protected void cancelAction() {
@@ -125,6 +124,10 @@ public class Drawing2D extends View {
                     Toast.LENGTH_SHORT).show();
         }
         setDrawingCacheEnabled(true);
+    }
+
+    protected void uploadImage(Context context) {
+
     }
 
     protected void saveImage(Context context) {
