@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.ic_upload:
-                        drawing.uploadImage(MainActivity.this);
+                        drawing.createUploadImage(MainActivity.this);
                         break;
                     case R.id.ic_undo:
                         drawing.cancelAction();

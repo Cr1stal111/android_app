@@ -8,7 +8,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Environment;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,10 +28,17 @@ import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.apache.http.params.HttpParams;
+
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -126,8 +135,131 @@ public class Drawing2D extends View {
         setDrawingCacheEnabled(true);
     }
 
-    protected void uploadImage(Context context) {
+    protected void createUploadImage(Context context) {
+        String uploadFilePath = Environment.getExternalStorageDirectory() + "/Pictures/";
+        String uploadFileName = toolbarView.getTitle().toString() + ".png";
+        String sourceFileUri = uploadFilePath + uploadFileName;
+        String upLoadServerUri = LoginActivity.HOST + "/api/upload";
 
+        new Thread(new Runnable() {
+            public void run() {
+                uploadImage(uploadFilePath, uploadFileName, sourceFileUri,
+                        upLoadServerUri, uploadFileName, "Image from android");
+            }
+        }).start();
+    }
+
+    protected int uploadImage(String uploadFilePath, String uploadFileName,
+                          String sourceFileUri, String upLoadServerUri, String title, String body) {
+        String fileName = sourceFileUri;
+
+        HttpURLConnection conn = null;
+        DataOutputStream dos = null;
+        String lineEnd = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "qwerty";
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+        File sourceFile = new File(sourceFileUri);
+
+        if (!sourceFile.isFile()) {
+
+            Log.e("uploadFile", "Source File not exist :"
+                    + uploadFilePath + "" + uploadFileName);
+
+            return 0;
+
+        } else {
+            int serverResponseCode = 0;
+            try {
+                FileInputStream fileInputStream = new FileInputStream(sourceFile);
+                URL url = new URL(upLoadServerUri);
+
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setUseCaches(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Accept", "*/*");
+                conn.setRequestProperty("token", LoginActivity.mToken);
+                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+                dos = new DataOutputStream(conn.getOutputStream());
+
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + uploadFileName + "\"");
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(lineEnd);
+
+                // create a buffer of  maximum size
+                bytesAvailable = fileInputStream.available();
+
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                buffer = new byte[bufferSize];
+
+                // read file and write it into form...
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                while (bytesRead > 0) {
+
+                    dos.write(buffer, 0, bufferSize);
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                }
+
+                // send multipart form data necesssary after file data...
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(lineEnd);
+
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"title\"");
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(title);
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"body\"");
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(body);
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens + boundary + twoHyphens);
+                dos.writeBytes(lineEnd);
+
+
+                // Responses fro m the server (code and message)
+                serverResponseCode = conn.getResponseCode();
+                String serverResponseMessage = conn.getResponseMessage();
+
+                Log.i(MainActivity.class.getSimpleName(), "OUTPUT HTTP Response is : "
+                        + serverResponseMessage + ": " + serverResponseCode);
+
+                if (serverResponseCode == 201) {
+                    Log.i(MainActivity.class.getSimpleName(), "OUTPUT File Upload Completed: " + uploadFileName);
+                }
+
+                //close the streams //
+                fileInputStream.close();
+                dos.flush();
+                dos.close();
+
+            } catch (MalformedURLException ex) {
+
+                ex.printStackTrace();
+
+                Log.i(MainActivity.class.getSimpleName(), "OUTPUT File Upload error: " + ex.getMessage(), ex);
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                Log.i(MainActivity.class.getSimpleName(), "OUTPUT File Upload Exception : "
+                        + e.getMessage(), e);
+            }
+            return serverResponseCode;
+
+        }
     }
 
     protected void saveImage(Context context) {
@@ -148,10 +280,11 @@ public class Drawing2D extends View {
                 } else {
                     toolbarView.setTitle(someText);
 
-                    File sdDirectory = context.getExternalFilesDir("/");
+//                    File sdDirectory = context.getExternalFilesDir("/");
+                    File sdDirectory = Environment.getExternalStorageDirectory();
 
                     if (sdDirectory.exists()) {
-                        File image = new File(sdDirectory, "/" + someText + ".png");
+                        File image = new File(sdDirectory, "/Pictures/" + someText + ".png");
                         FileOutputStream fileOutputStream;
 
                         try {
