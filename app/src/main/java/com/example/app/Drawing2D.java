@@ -135,24 +135,25 @@ public class Drawing2D extends View {
         setDrawingCacheEnabled(true);
     }
 
-    protected void createUploadImage(Context context) {
+    protected void createUploadImage() {
         String uploadFilePath = Environment.getExternalStorageDirectory() + "/Pictures/";
         String uploadFileName = toolbarView.getTitle().toString() + ".png";
         String sourceFileUri = uploadFilePath + uploadFileName;
         String upLoadServerUri = LoginActivity.HOST + "/api/upload";
-
         new Thread(new Runnable() {
             public void run() {
                 uploadImage(uploadFilePath, uploadFileName, sourceFileUri,
                         upLoadServerUri, uploadFileName, "Image from android");
             }
         }).start();
+        Toast.makeText(getContext(), "Image has been successfully",
+                Toast.LENGTH_LONG).show();
     }
 
     protected int uploadImage(String uploadFilePath, String uploadFileName,
                           String sourceFileUri, String upLoadServerUri, String title, String body) {
         String fileName = sourceFileUri;
-
+        int serverResponseCode;
         HttpURLConnection conn = null;
         DataOutputStream dos = null;
         String lineEnd = "\r\n";
@@ -171,7 +172,7 @@ public class Drawing2D extends View {
             return 0;
 
         } else {
-            int serverResponseCode = 0;
+            serverResponseCode = 0;
             try {
                 FileInputStream fileInputStream = new FileInputStream(sourceFile);
                 URL url = new URL(upLoadServerUri);
@@ -238,7 +239,8 @@ public class Drawing2D extends View {
                         + serverResponseMessage + ": " + serverResponseCode);
 
                 if (serverResponseCode == 201) {
-                    Log.i(MainActivity.class.getSimpleName(), "OUTPUT File Upload Completed: " + uploadFileName);
+                    Log.i(MainActivity.class.getSimpleName(),
+                            "OUTPUT File Upload Completed: " + uploadFileName);
                 }
 
                 //close the streams //
@@ -247,10 +249,10 @@ public class Drawing2D extends View {
                 dos.close();
 
             } catch (MalformedURLException ex) {
-
                 ex.printStackTrace();
 
-                Log.i(MainActivity.class.getSimpleName(), "OUTPUT File Upload error: " + ex.getMessage(), ex);
+                Log.i(MainActivity.class.getSimpleName(),
+                        "OUTPUT File Upload error: " + ex.getMessage(), ex);
             } catch (Exception e) {
 
                 e.printStackTrace();
@@ -260,6 +262,7 @@ public class Drawing2D extends View {
             return serverResponseCode;
 
         }
+
     }
 
     protected void saveImage(Context context) {
